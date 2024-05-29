@@ -1,231 +1,405 @@
-
-
-Simplifying Boolean Expressions Using the Quine-McCluskey Method
-
-Abstract
-
-This project aims to develop a Python implementation of the Quine-McCluskey (QM) method for simplifying Boolean expressions. The project focuses on the simplicity and clarity of the algorithm while providing a robust solution for generating prime implicants and minimising Boolean expressions using Petrick's Method. The implementation can be further optimised for performance. The algorithm comprises two main parts: generating prime implicants by recursively performing a 1-bit comparison, and selecting the minimum set of prime implicants that cover all minterms using Petrick's Method.
-
-Introduction
-
-Boolean expressions are fundamental in digital logic design and simplifying them is essential for creating efficient logic circuits. The Quine-McCluskey method is a systematic approach for minimising Boolean functions, which is especially useful for functions with many variables. This project implements the QM method in Python, including an explanation of the algorithm and a complete code implementation.
-
-1. Implementation
-
-
-Algorithm for the Quine-McCluskey Method
-
-Step-by-Step Explanation
-(Note: Italic font has been used to show the code snippets)
-
-1. Collect All Minterms
-   Convert each minterm to its binary representation.
-   Store these binary representations in a list (`Minterm_List`).
-
-   Example:
-   minterms = [2, 4, 6, 7, 8]
-   binary_minterms = ['0010', '0100', '0110', '0111', '1000']
-
-2. Initialise Lists
-   Create `List_1` by copying the minterm list and removing duplicates.
-
-   Example:
-   List_1 = ['0010', '0100', '0110', '0111', '1000']
-
-3. Process Don't Care Terms (if any)
-   Convert don’t care terms to binary and add to `List_1`.
-
-   Example:
-   dont_care_terms = [3, 5]
-   List_1 += ['0011', '0101']
-
-4. 1-Bit Comparison and Grouping
-   Compare each binary string in `List_1` with every other string.
-   If they differ by exactly one bit, create a new string with a wildcard `_` at the    differing bit position and add to `List_2`.
-   If no such comparison is possible, add the string to `List_3`.
-
-   Example:
-   List_2 = ['0_10', '01_0']
-   List_3 = ['1000', '0110']
-
-5. Iterate Until Completion
-   Repeat the above steps until `List_1` and `List_2` are empty.
-   The final `List_3` will contain all prime implicants.
-
-   Example:
-   List_3 = ['1000', '0_10', '011_', '01_0']
-
-6. Remove Duplicates from List_3
-   Convert `List_3` to a set to remove duplicates and convert it back to a list.
-
-   Example:
-   List_3 = list(set(List_3))
-
-7. Create Prime Implicant Table
-   For each prime implicant, determine the minterms it covers by replacing wildcards with all possible 0 and 1 combinations.
-
-   Example:
-   Table: 
-          Implicant     Implicant_string           Combo           Binrep
-0            I0                  0001                      [m8]             1000
-1            I1                  0010                  [m2, m6]           0_10
-2            I2                  0100                  [m6, m7]           011_
-3            I3                 1000                   [m4, m6]          01_0
-
-8. Apply Petrick's Method
-   Construct a logical function \( P \) that represents all columns being covered.
-   Use De Morgan's Laws to simplify \( P \) into a sum of products.
-   Identify the minimum set of prime implicants by finding the terms with the fewest literals.
-
-   Example:
-   P = (I0 + I1) * (I1 + I2) * (I2 + I3)
-   Simplified P = I1I2 + I0I3
-
-9. Generate Simplified Boolean Expression
-   Convert the selected prime implicants back to the original Boolean variables.
-
-   Example:
-   Expression = A'B + BC
-
-Python Code Implementation
-
-The full Python code for the QM method can be found at below provided link. It includes functions for cleaning input strings, generating binary representations, performing 1-bit comparisons, and applying Petrick's method to find the minimal Boolean expression. 
-
-Link for code:     https://colab.research.google.com/drive/1VF64CmS8yDI9CVR1CmkIuO5YvhfrG4hN
-
-
-
-2. Results  
-(a) Generate minterms based on your uppercase first name's ASCII code. Treat each digit of the ASCII code as a minterm. If any digit is repeated, consider it only once. Use the generated minterms to obtain the minimized SOP expression (using the Quine-McCluskey method). 
-
-[Note: input part of the code has been underlined]
-
-Do you want to provide your name or SoP implicants?
-choose 'y' for name and 'n' for SoP implicants: y
-
-please type your first name: RISHIKESH
-
-Corresponding min-term input for the name is: [82, 73, 83, 72, 73, 75, 69, 83, 72]
-Do you know the number of variables for your equation?
-Type 'y' for yes and 'n' for no: n
-
-
-The least number of variable based on your input is: 7
-
-Number of variable in the expression is: 7 , from a to g
-
-The binary representation of all the given minterms is:  ['1000101', '1001000', '1001001', '1001011', '1010010', '1010011']
-List after recursively running the 1 bit difference is:  ['101001_', '1000101', '100100_', '10010_1']
-List_final is: ['101001_', '1000101', '100100_', '10010_1']
-
-List_2 containing all the minterms, except don't care is: 
-['m69', 'm72', 'm73', 'm75', 'm82', 'm83']
-
-df7 is a table formed from List_final
-It is a table containing columns as: Implicant, Implicant_string, Combo, Binrep
-Implicant is just a serialisation of implicants
-Implicant_string is another way of serialising the implicants, so that tabular method of Petric's method can be implemented
-Combo gives the list of minterm(excluding don't care) which are grouped together to form that implicant
-Binrep gives the binary representation of that implicant
-
-df7 is:
-   Implicant   Implicant_string       Combo                  Binrep
-0        I0             0001               [m82, m83]              101001_
-1        I1             0010                  [m69]                    1000101
-2        I2             0100               [m72, m73]              100100_
-3        I3             1000               [m73, m75]               10010_1
-
-Dict_1 is a dictionary whose keys corresponds to the minterm and values in that
-key corresponds to the implicant which contains those minterm.
-Dict_1 is:
- {'m69': ['0010'], 'm72': ['0100'], 'm73': ['0100', '1000'], 'm75': ['1000'], 'm82': ['0001'], 'm83': ['0001']}
-
-final_list_old gives you the list of implicants which covers all the minterms
-final_list_old is: ['1111']
-df9 is a table created by final_list_old, which arranges the implicants
-df9 is:
-              Group Binrep  num_term
-0  [I3, I2, I1, I0]   1111         4
-
-Your expression 1 is:
-['I3', 'I2', 'I1', 'I0']
-ab'c'de'g + ab'c'de'f' + ab'c'd'ef'g + ab'cd'e'f 
-
-
-
-(a) Generate minterms based on your uppercase first name's ASCII code. Treat each digit of the ASCII code as a minterm. If any digit is repeated, consider it only once. Use the generated minterms to obtain the minimized SOP expression (using the Quine-McCluskey method). 
-
-[Note: input part of the code has been underlined]
-
-Do you want to provide your name or SoP implicants?
-choose 'y' for name and 'n' for SoP implicants: n
-please provide your input with SoP implicants in comma separated format
-0,5,7,8,9,12,13,23,24,25,28,29,37,40,42,44,46,55,56,57,60,61
-
-Do you want to provide don't care for your expression?
-
-choose 'y' for yes and 'n' for no: n
-
-Given min-term input is: 0,5,7,8,9,12,13,23,24,25,28,29,37,40,42,44,46,55,56,57,60,61
-
-Given don't care min-term input is: 
-
-
-Do you know the number of variables for your equation?
-Type 'y' for yes and 'n' for no: n
-
-
-The least number of variable based on your input is: 6
-
-Number of variable in the expression is: 6 , from a to f
-
-The binary representation of all the given minterms is:  ['000000', '000101', '000111', '001000', '001001', '001100', '001101', '010111', '011000', '011001', '011100', '011101', '100101', '101000', '101010', '101100', '101110', '110111', '111000', '111001', '111100', '111101']
-List after recursively running the 1 bit difference is:  ['0001_1', '101__0', '00_000', '__1_00', '00_101', '_11_0_', '0_0111', '0_1_0_', '_10111', '_00101']
-List_final is: ['0001_1', '101__0', '00_000', '__1_00', '00_101', '_11_0_', '0_0111', '0_1_0_', '_10111', '_00101']
-
-List_2 containing all the minterms, except don't care is:  ['m0', 'm5', 'm7', 'm8', 'm9', 'm12', 'm13', 'm23', 'm24', 'm25', 'm28', 'm29', 'm37', 'm40', 'm42', 'm44', 'm46', 'm55', 'm56', 'm57', 'm60', 'm61']
-df7 is a table formed from List_final
-It is a table containing columns as: Implicant, Implicant_string, Combo, Binrep
-Implicant is just a serialisation of implicants
-Implicant_string is another way of serialising the implicants, so that tabular method of Petric's method can be implemented
-Combo gives the list of minterm(excluding don't care) which are grouped together to form that implicant
-Binrep gives the binary representation of that implicant
-
-df7 is:
-   Implicant   Implicant_string                                     Combo                                Binrep
-0        I0         0000000001   [m8, m12, m24, m28, m40, m44, m56, m60]           __1_00
-1        I1         0000000010                                 [m5, m13]                                   00_101
-2        I2         0000000100                                 [m5, m37]                                   _00101
-3        I3         0000001000  [m24, m25, m28, m29, m56, m57, m60, m61]          _11_0_
-4        I4         0000010000                                [m23, m55]                                  _10111
-5        I5         0000100000                                  [m5, m7]                                   0001_1
-6        I6         0001000000                      [m40, m42, m44, m46]                         101__0
-7        I7         0010000000                                 [m7, m23]                                  0_0111
-8        I8         0100000000    [m8, m9, m12, m13, m24, m25, m28, m29]           0_1_0_
-9        I9         1000000000                                  [m0, m8]                                   00_000
-
-
-Dict_1 is a dictionary whose keys corresponds to the minterm and values in that
-key corresponds to the implicant which contains those minterm.
-Dict_1 is:
- {'m0': ['0000000100'], 'm5': ['0000000001', '0000010000', '1000000000'], 'm7': ['0000000001', '0001000000'], 'm8': ['0000000100', '0000001000', '0010000000'], 'm9': ['0010000000'], 'm12': ['0000001000', '0010000000'], 'm13': ['0000010000', '0010000000'], 'm23': ['0001000000', '0100000000'], 'm24': ['0000001000', '0000100000', '0010000000'], 'm25': ['0000100000', '0010000000'], 'm28': ['0000001000', '0000100000', '0010000000'], 'm29': ['0000100000', '0010000000'], 'm37': ['1000000000'], 'm40': ['0000000010', '0000001000'], 'm42': ['0000000010'], 'm44': ['0000000010', '0000001000'], 'm46': ['0000000010'], 'm55': ['0100000000'], 'm56': ['0000001000', '0000100000'], 'm57': ['0000100000'], 'm60': ['0000001000', '0000100000'], 'm61': ['0000100000']}
-
-final_list_old gives you the list of implicants which covers all the minterms
-final_list_old is: ['1110100111', '1111100110']
-df9 is a table created by final_list_old, which arranges the implicants
-df9 is:
-                          Group  ... num_term
-0  [I9, I8, I7, I5, I2, I1, I0]  ...        7
-1  [I9, I8, I7, I6, I5, I2, I1]  ...        7
-
-[2 rows x 3 columns]
-
-Your expression 1 is:
-['I9', 'I8', 'I7', 'I5', 'I2', 'I1', 'I0']
-b'c'de'f + bc'def + a'ce' + bce' + a'b'd'e'f' + ab'cf' + a'b'c'df 
-
-Your expression 2 is:
-['I9', 'I8', 'I7', 'I6', 'I5', 'I2', 'I1']
-b'c'de'f + bc'def + a'ce' + a'c'def + bce' + a'b'd'e'f' + ab'cf' 
-
-
+# -*- coding: utf-8 -*-
+"""Rishikesh_DLD_Project.ipynb
+
+Automatically generated by Colab.
+
+Original file is located at
+    https://colab.research.google.com/drive/1VF64CmS8yDI9CVR1CmkIuO5YvhfrG4hN
+"""
+
+import pandas as pd
+import numpy as np
+import re
+
+# clean_string removes all the characters except numbers and comma,
+# it also removes leading, trailing, repetitive comma, and space.
+def clean_string(input_string):
+    # Remove all characters except numbers and commas
+    cleaned_string = re.sub(r'[^0-9,]', '', input_string)
+
+    # Replace multiple commas with just one comma
+    cleaned_string = re.sub(r',{2,}', ',', cleaned_string)
+
+    # Remove commas from the beginning and end of the string
+    cleaned_string = cleaned_string.strip(',')
+
+    # Ensure the string starts and ends with a number
+    """ if cleaned_string and not cleaned_string[0].isdigit():
+        cleaned_string = '0' + cleaned_string
+    if cleaned_string and not cleaned_string[-1].isdigit():
+        cleaned_string += '0' """
+
+    return cleaned_string
+
+# fillgroup is a function which gives out the number of 1's
+# present in the binary representation of the input n
+def fillgroup(n):
+  binrep = bin(n)[2:]
+  group = 0
+  for i in range(len(binrep)):
+    group = group + int(binrep[i])
+  return str(group)
+
+
+# fillcombo is a function which gives out the
+# combination of the minterms
+def fillcombo(n):
+  c='m'+str(n)
+  return c
+
+def fillcombo1(n):
+  c='d'+str(n)
+  return c
+
+
+# fillbinrep is a function which gives out the
+# binary representation of the input n
+def fillbinrep(n):
+  binrep = bin(n)[2:]
+  binrep = str(binrep)
+  binrep = binrep.rjust((num_var - len(binrep)) + len(binrep), '0')
+  return binrep
+
+
+# creat_string is a function which takes two string of same length
+# compare them character wise, and if there is one character difference
+# it gives a new sting, else returns 0
+def create_string(s1, s2):
+  c=0
+  s3=''
+  for i in range(len(s1)):
+        if s1[i] == s2[i]:
+            s3 += s1[i]
+        else:
+            s3 += '_'
+            c= c+1
+  if c==1:
+      return s3
+  else:
+      return 0
+
+
+
+# exgen is a expression generator function, which generates
+# minterm for given binary number, i.e. input n
+"""def exgen(s):
+  c = ''
+  for i in range(len(s)):
+      if s[i]=='1':
+          c=c+'a'+str(i)
+      elif s[i]=='0':
+          c=c+'a'+str(i)+"'"
+  return c"""
+
+# exgen is a expression generator function, which generates
+# minterm for given binary number, i.e. input n
+def exgen(s):
+  c = ''
+  p=96
+  for i in range(len(s)):
+      p=p+1
+      if s[i]=='1':
+          c=c+chr(p)
+      elif s[i]=='0':
+          c=c+chr(p)+"'"
+  return c
+
+# converts the input string into the corresponding list
+# of there character's ASCII value
+def string_to_ascii_list(input_string):
+    ascii_list = []
+    for char in input_string:
+        ascii_list.append(ord(char))
+    return ascii_list
+
+# perform_or() performs the or operation between two binary strings
+# of equal length
+def perform_or(list1, list2):
+  list3=[]
+  for i in list1:
+    for j in list2:
+      s4=''
+      if len(j) != len(i):
+        print("length of i is:", len(i))
+        print("length of j is:", len(j))
+        raise ValueError("Strings must be of equal length.")
+
+      for k in range(len(i)):
+        if j[k]=='0' and i[k]=='0':
+          s4=s4+'0'
+        else:
+          s4 = s4+'1'
+      list3.append(s4)
+  list3= clean_list(list3)
+  return list3
+
+# clean_list() uses the property of boolean algebra to reduce the term
+# x+xy=x;
+def clean_list(lst):
+    new_list_1 = []
+
+    for i in lst:
+        for j in lst:
+            if i == j:
+                continue  # Skip comparing the same string
+            count = 0
+            for k in range(len(i)):
+                if i[k] != j[k]:
+                    count += 1
+            if count == 1:
+                if num_str(i) > num_str(j):
+                    new_list_1.append(i)
+                else:
+                    new_list_1.append(j)
+
+    # Use a set for new_list_1 to avoid duplicates
+    new_list_1 = list(set(new_list_1))
+    lst = [element for element in lst if element not in new_list_1]
+    lst = list(set(lst))
+    return lst
+
+# num_str() gives the number of 1 present in the given input string
+def num_str(s):
+  c=0
+  for i in s:
+    i=int(i)
+    c=c+i
+  return c
+
+# grp_to_imp() gives all the implicant which contains the given input(minterm)
+def grp_to_imp(s):
+  list_4=[]
+  for i in range(len(s)):
+    if s[i]=='1':
+      c= 'I'+str(len(s)-i-1)
+      list_4.append(c)
+  return list_4
+
+
+# This function gives a list of all the possible binary combination
+# for a given string with blanks in it.
+def bin_to_term(s):
+    # Count the number of underscores
+    n = s.count("_")
+
+    # List to store the results
+    L = []
+
+
+    # Iterate over the range of binary values to replace underscores
+    for i in range(2 ** n):
+        # Get the binary representation of the current number
+        mid_bin = bin(i)[2:].zfill(n)  # Remove '0b' and pad with zeros if necessary
+
+        # Convert the string to a list to allow modification
+        s1 = list(s)
+
+        # Replace underscores with corresponding binary digits
+        count = 0
+        for j in range(len(s1)):
+            if s1[j] == "_":
+                s1[j] = mid_bin[count]
+                count += 1
+
+        # Convert list back to string and add to the results list
+        L.append("".join(s1))
+    if n==0:
+      s1=[s]
+      return s1
+    else:
+      return L
+
+# This function creates a list of minterm
+# for a given string
+def combo_fill(s):
+  L2=[]
+  L1=bin_to_term(s)
+  for i in L1:
+    num = int(i, 2)
+    if num in List:
+      L2.append(fillcombo(num))
+  return L2
+
+print("Do you want to provide your name or SoP implicants?")
+res = input("choose 'y' for name and 'n' for SoP implicants: ")
+if res=="n":
+  print("please provide your input with SoP implicants in comma separated format")
+  List = input()
+  print("\nDo you want to provide don't care for your expression?")
+  res1 = input("\nchoose 'y' for yes and 'n' for no: ")
+  if res1=="y":
+    print("\nplease provide the don't care with SoP implicants in comma separated format")
+    List10 = input()
+  else:
+    List10 =""
+  List = clean_string(List)
+  List10 = clean_string(List10)
+  # List = ''.join(List.split()) #removes space from the string List
+  print("\nGiven min-term input is:", List)
+  print("\nGiven don't care min-term input is:", List10)
+
+  print("\n")
+  List = List.split(",") # converts 'List' from string to list
+  List = [eval(i) for i in List]  #changing str datatype to int in the list
+  List10 = List10.split(",") # converts 'List' from string to list
+  if List10[0] != "":
+    List10 = [eval(i) for i in List10]  #changing str datatype to int in the list
+    List10 = list(set(List10))
+else:
+  name = input("\nplease type your first name: ")
+  List = string_to_ascii_list(name)
+  print("\nCrrosponding min-term input for the name is:", List)
+  List10 = [""]
+
+# Convert list to set to remove duplicates
+List = list(set(List))
+
+List.sort() #sorting the list
+List10.sort()
+if List10[0] != "":
+  combine_list =List +List10
+else:
+  combine_list =List
+combine_list = list(set(combine_list))
+response = input("Do you know the number of variables for your equation?\nType 'y' for yes and 'n' for no: ")
+print("\n")
+if response == "y":
+  num_var=input("\nWhat is the number of variable in your input: ")
+  num_var = int(num_var)
+elif response == "n":
+  num_var = 1 # finding the number of varibles in the expression
+  while (not(combine_list[-1] <= ((2**num_var)-1))):
+    num_var = num_var+1
+  print("The least number of variable based on your input is:", num_var)
+else:
+  num_var = 1 # finding the number of varibles in the expression
+  while (not(combine_list[-1] <= ((2**num_var)-1))):
+    num_var = num_var+1
+  print("Your response is not in prescribed format. The least number of variable based on your input is:", num_var)
+
+
+
+print("\nNumber of variable in the expression is:", str(num_var),", from a to", chr(96+num_var))
+
+list_1 = [] # Contains binary representation of all the minterms, including don't care
+for i in combine_list:
+  i= int(i)
+  t=fillbinrep(i)
+  list_1.append(t)
+print("\nThe binary representation of all the given minterms is: ",list_1)
+
+List_2=[] # contains all the minterm, excluding don't care
+for i in List:
+  t=fillcombo(i)
+  List_2.append(t)
+
+# Run the recursive 1 bit difference on the list of binary representation
+# of the given minterms
+cont1=1
+list_2 =[]
+List_final =[]
+while cont1 != 0:
+  for i in list_1:
+    con2=0
+    for j in list_1:
+      diff = create_string(i,j)
+      if diff != 0:
+        con2= con2 +1
+        list_2.append(diff)
+    if con2 == 0:
+      List_final.append(i)
+  if len(list_2)==0:
+    cont1=0
+    List_final= List_final + list_1
+  else:
+    list_2 = list(set(list_2))
+    list_1=list_2
+    list_2= []
+List_final= list(set(List_final))
+print("List after recursively running the 1 bit difference is: ",List_final)
+
+df7 = pd.DataFrame(columns=['Implicant','Implicant_string','Combo', 'Binrep' ])
+
+# List to hold new rows
+rows_to_add = []
+j=0
+Implicant_string= "0" * len(List_final)
+print("List_final is:", List_final)
+list_remove=[] # will add all the implicant consisting of only don't care, so that we can remove it later
+for i in List_final:
+
+  if len(combo_fill(i))==0: #this is to remove implicant consisting of only don't care
+    list_remove.append(i)
+List_final = [item for item in List_final if item not in list_remove]
+for i in List_final:
+    k = 'I'+str(j)
+    Implicant_string= "0" * (len(List_final) - (j+1))
+    Implicant_string = Implicant_string + "1"
+    end_string = "0" * j
+    Implicant_string = Implicant_string + end_string
+    comb = combo_fill(i)
+
+    new_row = { 'Implicant' : k, 'Implicant_string' : Implicant_string, 'Combo': comb, 'Binrep': i }
+    rows_to_add.append(new_row)
+    j=j+1
+
+
+# Convert the list of dictionaries to a DataFrame
+new_rows_df = pd.DataFrame(rows_to_add)
+
+# Concatenate the new rows DataFrame with df7
+df7 = pd.concat([df7, new_rows_df], ignore_index=True)
+Dict_1 = {key: None for key in List_2}
+print("\nList_2 containing all the minterms, except don't care is: ", List_2)
+
+print("df7 is a table formed from List_final")
+print("It is a table containing columns as: Implicant, Implicant_string, Combo, Binrep")
+print("Implicant is just a serialisation of implicants")
+print("Implicant_string is another way of serialising the implicants, so that tabular method of Petric's method can be implemented")
+print("Combo gives the list of minterm(excluding don't care) which are grouped together to form that implicant")
+print("Binrep gives the binary representation of that implicant")
+print("\ndf7 is:\n", df7)
+num_row = df7.shape[0]
+for i in range(num_row):
+  combo_list = df7.loc[i, 'Combo']
+  implicant_string= df7.loc[i, 'Implicant_string']
+  for j in combo_list:
+    if Dict_1[j] is None:
+      Dict_1[j] = []
+    Dict_1[j].append(implicant_string)
+print("\nDict_1 is a dictionary whose keys corresponds to the minterm and values in that")
+print("key corresponds to the implicant which contains those minterm.")
+print("Dict_1 is:\n", Dict_1)
+row_df7 = df7.shape[0]
+final_list_old_initial_str = "0"*row_df7
+final_list_old = [final_list_old_initial_str]
+for key in Dict_1:
+  mid_list= Dict_1[key]
+  final_list_old = perform_or(mid_list, final_list_old)
+print("\nfinal_list_old gives you the list of implicants which covers all the minterms")
+print("final_list_old is:", final_list_old)
+
+df9 = pd.DataFrame(columns=['Group','Binrep', 'num_term'])
+for i in final_list_old:
+  df9.loc[len(df9.index)] = [ grp_to_imp(i) , i, num_str(i) ]
+print("df9 is a table created by final_list_old, which arranges the implicants")
+print ("df9 is:")
+print(df9)
+
+
+df9 = df9.sort_values(by='num_term').reset_index(drop=True)
+num_minterm = df9.loc[0, 'num_term']
+result = df9.loc[df9['num_term'] == num_minterm, 'Group']
+l=1
+for i in result:
+  print("\nYour expression",l,"is:")
+  exp =""
+  for j in i:
+    p = df7.loc[df7['Implicant'] == j, 'Binrep'].values[0]
+    p= exgen(p)
+    exp = exp + p +" "+"+"+" "
+  exp = exp[:-1]
+  exp = exp[:-1]
+  print(i)
+  print(exp)
+  l=l+1
